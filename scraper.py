@@ -10,7 +10,7 @@ webhookURL = ""
 def get_recent_pastes():
     response = requests.get(requestURL)
 
-    if response.status_code is not 200:
+    if response.status_code != 200:
         print(f"Failed to get recent pastes, status code: {response.status_code}")
         return []
 
@@ -45,10 +45,20 @@ while True:
         continue
 
     webhookContent = ""
+    overflow = ""
 
     for key in to_update:
-        webhookContent += make_link(key)
+        if len(webhookContent) < 1980:
+            webhookContent += make_link(key)
+        else:
+            overflow += make_link(key)
 
     webhook = DiscordWebhook(url=webhookURL, content=webhookContent)
     webhook.execute()
+
+    if overflow != "":
+        time.sleep(2)
+        webhook = DiscordWebhook(url=webhookURL, content=overflow)
+        webhook.execute()
+
     time.sleep(60)
