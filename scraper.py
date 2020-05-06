@@ -1,6 +1,7 @@
 import requests
 import json
 import time
+import datetime
 from discord_webhook import DiscordWebhook
 
 requestURL = "https://scrape.pastebin.com/api_scraping.php?limit=100"
@@ -41,11 +42,17 @@ while True:
             last_hundred_pastes.append(key)
             to_update.append(key)
 
+    now = datetime.datetime.now()
+
     if len(to_update) == 0:
+        print(f"No new pastes at {now}")
+        time.sleep(60)
         continue
 
     webhookContent = ""
     overflow = ""
+
+    webhookContent += f"New pastes as of: {now}"
 
     for key in to_update:
         if len(webhookContent) < 1980:
@@ -61,4 +68,5 @@ while True:
         webhook = DiscordWebhook(url=webhookURL, content=overflow)
         webhook.execute()
 
+    print(f"Got {len(to_update)} new pastes at: {now}")
     time.sleep(60)
