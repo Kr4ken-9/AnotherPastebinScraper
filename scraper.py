@@ -26,23 +26,26 @@ last_hundred_pastes = []
 
 while True:
     recent_pastes = get_recent_pastes()
+    now = datetime.datetime.now()
 
     if len(recent_pastes) == 0:
+        print(f"No new pastes at {now}")
         time.sleep(60)
         continue
 
     to_update = []
+    counter = 99
     for element in recent_pastes:
         key = element["key"]
 
         if key not in last_hundred_pastes:
-            if len(last_hundred_pastes) == 100:
-                last_hundred_pastes.pop(0)
+            last_hundred_length = len(last_hundred_pastes)
+            if last_hundred_length == 100:
+                last_hundred_pastes.pop(counter)
+                counter -= 1
 
             last_hundred_pastes.append(key)
             to_update.append(key)
-
-    now = datetime.datetime.now()
 
     if len(to_update) == 0:
         print(f"No new pastes at {now}")
@@ -52,7 +55,7 @@ while True:
     webhookContent = ""
     overflow = ""
 
-    webhookContent += f"New pastes as of: {now}"
+    webhookContent += f"New pastes as of: {now}\n"
 
     for key in to_update:
         if len(webhookContent) < 1980:
