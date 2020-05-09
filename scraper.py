@@ -5,7 +5,10 @@ import datetime
 from discord_webhook import DiscordWebhook
 
 requestURL = "https://scrape.pastebin.com/api_scraping.php?limit=100"
-webhookURL = ""
+webhookURLs = [
+    "",
+    ""
+]
 
 
 def get_recent_pastes():
@@ -34,15 +37,16 @@ while True:
         continue
 
     to_update = []
-    counter = 99
     for element in recent_pastes:
         key = element["key"]
 
         if key not in last_hundred_pastes:
             last_hundred_length = len(last_hundred_pastes)
             if last_hundred_length == 100:
-                last_hundred_pastes.pop(counter)
-                counter -= 1
+                for i in range(0, 100):
+                    if last_hundred_pastes[i] == key:
+                        last_hundred_pastes.pop(i)
+
 
             last_hundred_pastes.append(key)
             to_update.append(key)
@@ -63,10 +67,16 @@ while True:
         else:
             overflow += make_link(key)
 
-    webhook = DiscordWebhook(url=webhookURL, content=webhookContent)
-    webhook.execute()
+    for webhookURL in webhookURLs:
+        if webhookURL == "":
+            continue
 
-    if overflow != "":
+        webhook = DiscordWebhook(url=webhookURL, content=webhookContent)
+        webhook.execute()
+
+        if overflow == "":
+            continue
+
         time.sleep(2)
         webhook = DiscordWebhook(url=webhookURL, content=overflow)
         webhook.execute()
